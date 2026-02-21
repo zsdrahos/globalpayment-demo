@@ -24,6 +24,7 @@ import lombok.Setter;
 public class IdempotencyRecord {
 
     @Id
+    @Column(name = "idempotency_key")
     private String key;
 
     @Column(nullable = false)
