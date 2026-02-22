@@ -1,23 +1,24 @@
-# AI Usage - Prompt History
+# AI Prompt History
 
-The following significant prompts were used during the development of the Global Payment Service to assist with code generation and architectural design.
 
-### Prompts and Topics:
+## 1. Architectural Design & Patterns
+* **Prompt:** "What is an X-Idempotency-Key and what is the best way to handle it in a distributed payment system using Spring Boot"
+    * **Result:** Result: The AI explained the concept of idempotency (ensuring an operation happens only once) and suggested a database-backed state machine (Processing/Success/Failed).
+    * **My Implementation:** Result: The AI explained the concept of idempotency (ensuring an operation happens only once) and suggested a database-backed state machine (Processing/Success/Failed).
 
-1. Dependency Management:
-"What dependencies are needed for a production-ready Spring Boot payment service using Java 21, H2, and requiring resilience for flaky external APIs?"
+## 2. Resilience & Error Handling
+* **Prompt:** "What is and how to implement a Feign Client with Resilience4j Retry and Circuit Breaker for a flaky external API?"
+    * **Result:** Provided the configuration structure for `application.properties` and the `@CircuitBreaker` annotation usage.
+    * **My Implementation:** I fine-tuned the retry attempts and wait durations to match the "flaky API" requirement.
 
-2. Domain Modeling:
-"Create a JPA Entity for a bank Account with balance, currency, and optimistic locking. Also, design an IdempotencyRecord entity to handle X-Idempotency-Key storage."
+## 3. Concurrency & Data Integrity
+* **Prompt:** "Explain how @Version prevents lost updates in a bank transfer scenario."
+    * **Result:** Explained Optimistic Locking.
+    * **My Implementation:** I added the versioning to the `Account` entity to ensure that concurrent transfers to the same account do not result in incorrect balances.
 
-3. Idempotency Logic:
-"Implement a Controller and Service logic that checks for an idempotency key. If the status is PROCESSING, return 409. If SUCCESS, return the previous response. If FAILED, allow retry."
+## 4. Troubleshooting (Manual Refinement)
+* **Issue:** I encountered a "Reserved Keyword" error with the H2 database when using `KEY` as a column name.
+* **Process:** I used AI to identify that `KEY` is reserved in H2 and manually applied the `@Column(name = "idempotency_key")` fix.
 
-4. External API Resilience:
-"How to implement a Feign Client with Resilience4j Retry and Circuit Breaker to handle a 503 error from a mocked exchange rate API?"
-
-5. System Integration:
-"How to use Spring ApplicationEventPublisher to notify external domains like Fraud Detection about a successful transfer without tight coupling?"
-
-6. Differences between Java 17 and Java 21:
-"What is the key difference between java 17 and java 21?"
+## 5. Documentation
+* **Issue:** Generate a professional README.md including build instructions, and a PROMPTS.md with the asked questions.
