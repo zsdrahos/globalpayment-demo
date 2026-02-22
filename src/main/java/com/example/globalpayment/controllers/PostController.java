@@ -47,8 +47,11 @@ public class PostController {
     }
 
     private ResponseEntity<TransferResponse> processNewRequest(String key, TransferRequest request) {
+
+        String hash = String.valueOf(request.hashCode());
         var record = IdempotencyRecord.builder()
                 .key(key)
+                .requestHash(hash)
                 .status(IdempotencyStatus.PROCESSING)
                 .build();
         idempotencyRepository.save(record);

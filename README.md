@@ -1,13 +1,11 @@
 # Global Payment Service
 
-This is a production-ready Payment Gateway service built with Spring Boot 3.x and Java 21. It manages user accounts and processes fund transfers with a focus on reliability, data integrity, and idempotency in distributed systems.
+This is a production-ready Payment Gateway service built with Spring Boot 3.5.11 and Java 21. It manages user accounts and processes fund transfers with a focus on reliability, data integrity, and idempotency in distributed systems.
 
 ## Tech Stack
 * Language: Java 21
-* Framework: Spring Boot 3.3.x
+* Framework: Spring Boot 3.5.11
 * Database: H2 (In-memory)
-* Communication: Spring Cloud OpenFeign
-* Resilience: Resilience4j (Retry, Circuit Breaker)
 * Build Tool: Maven
 * Utilities: Lombok
 
@@ -17,16 +15,16 @@ This is a production-ready Payment Gateway service built with Spring Boot 3.x an
 
 ### 1. Idempotency Implementation
 To prevent double-charging during network retries, every POST /api/transfers request requires an X-Idempotency-Key header.
-* Persistence: Idempotency keys are stored in a dedicated database table (idempotency_keys).
-* State Machine: Each request transitions through states: PROCESSING, SUCCESS, or FAILED.
+* Persistence: Idempotency keys are stored in a IDEMPOTENCY_KEYS table.
+* States: PROCESSING -> SUCCESS/FAILED.
 * Logic: 
   - If a request is PROCESSING, the system returns 409 Conflict.
   - If SUCCESS, the cached original response is returned.
   - If FAILED, the user is allowed to retry the transaction.
 
 ### 2. Concurrency and Data Integrity
-* Optimistic Locking: The Account entity uses a @Version field. This prevents the "Lost Update" problem when multiple concurrent transfers target the same account.
-* Atomic Transactions: All balance adjustments are wrapped in @Transactional blocks to ensure ACID properties.
+*  The Account entity uses a @Version field. This prevents the "Lost Update" problem when multiple concurrent transfers target the same account.
+* All balance adjustments are wrapped in @Transactional blocks to ensure ACID properties. (Atomic Transactions)
 
 ### 3. Resilience to External Services
 The external Exchange Rate API is treated as an unreliable dependency.
@@ -34,7 +32,7 @@ The external Exchange Rate API is treated as an unreliable dependency.
 * Circuit Breaker: Prevents cascading failures by stopping calls to the external service if it becomes consistently unstable.
 
 ### 4. System Integration
-The service utilizes Spring's ApplicationEventPublisher to trigger a TransferSuccessfulEvent. This allows other domains, such as Fraud Detection or Notifications, to remain decoupled from the core transfer logic.
+The service utilizes Spring's ApplicationEventPublisher to trigger a TransferSuccessfulEvent. 
 
 ---
 
@@ -52,7 +50,7 @@ Body:
   "fromAccountId": 1,
   "toAccountId": 2,
   "amount": 100.00,
-  "currency": "USD"
+  "currency": "EUR"
 }
 
 Responses:
@@ -78,6 +76,13 @@ H2 Console:
 * JDBC URL: jdbc:h2:mem:paymentdb
 * User: sa
 * Password: (empty)
+
+Insert test data: 
+ 
+<code>INSERT INTO accounts (id, owner_name, balance, currency, version) 
+VALUES (1, 'Alice', 1000.00, 'EUR', 0); <br><br>
+INSERT INTO accounts (id, owner_name, balance, currency, version) 
+VALUES (2, 'Bob', 500.00, 'EUR', 0);</code>
 
 ---
 
